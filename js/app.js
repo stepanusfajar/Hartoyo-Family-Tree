@@ -15,7 +15,7 @@
 
 const FAMILY_NAME = "Hartoyo"; // Change to your family name
 const firebaseConfig = {
-  apiKey: "AIzaSy" + "BhJiuN07UHBR6beHyYgwj2_BFnKEZnF88",
+  apiKey: "AIzaSy" + "BuIffixgpSa81JXZsh2NlFxBmUcMsH_Fg",
   authDomain: "hartoyo-family-tree.firebaseapp.com",
   projectId: "hartoyo-family-tree",
   storageBucket: "hartoyo-family-tree.firebasestorage.app",

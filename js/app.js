@@ -339,26 +339,34 @@ function renderTree() {
                        (p.motherId && allPeople.some(pp => pp.id === p.motherId));
   });
 
-  // Find roots (people with no parents in the tree)
-  const ids = new Set(allPeople.map(p => p.id));
-  const hasParentInTree = id => allPeople.some(p => p.id === id &&
-    ((p.fatherId && ids.has(p.fatherId)) || (p.motherId && ids.has(p.motherId))));
-  let roots = allPeople.filter(p => {
-    if (hasParentInTree(p.id)) return false;
-    // Also exclude if spouse has parents (this person belongs in spouse's family)
+  // Build symmetric spouse map
+  const spouseOf = {};
+  allPeople.forEach(p => {
     if (p.spouseId) {
-      const spouse = allPeople.find(s => s.id === p.spouseId);
-      if (spouse && hasParentInTree(spouse.id)) return false;
+      spouseOf[p.id] = p.spouseId;
+      if (!spouseOf[p.spouseId]) spouseOf[p.spouseId] = p.id;
     }
+  });
+
+  // Find roots (people with no parents in the tree)
+  let roots = allPeople.filter(p => {
+    if (hasParents[p.id]) return false;
+    // Exclude if my spouse has parents (I belong in spouse's family tree)
+    const mySpouseId = spouseOf[p.id];
+    if (mySpouseId && hasParents[mySpouseId]) return false;
+    // Exclude if someone claims me as their spouse and they have parents
+    const claimedBy = allPeople.find(s => s.spouseId === p.id);
+    if (claimedBy && hasParents[claimedBy.id]) return false;
     return true;
   });
-  // For couples where both are roots, keep only one
+  // For couples where both are roots, keep only one (using symmetric map)
   const rootMap = new Map(roots.map(r => [r.id, r]));
   roots = roots.filter(p => {
-    if (!p.spouseId) return true;
-    const s = rootMap.get(p.spouseId);
+    const sId = spouseOf[p.id];
+    if (!sId) return true;
+    const s = rootMap.get(sId);
     if (!s) return true;
-    return p.id < s.id;
+    return p.id < sId;
   });
 
   if (roots.length === 0) {
@@ -382,7 +390,9 @@ function renderTreeNode(personId, visited) {
   const person = allPeople.find(p => p.id === personId);
   if (!person || !matchesSearch(person)) return '';
 
-  const spouse = person.spouseId ? allPeople.find(s => s.id === person.spouseId) : null;
+  const spouse = person.spouseId
+    ? allPeople.find(s => s.id === person.spouseId)
+    : allPeople.find(s => s.spouseId === person.id);
   // Find children of either parent in the couple
   const childIds = new Set();
   const addChild = p => { if (p && !childIds.has(p.id)) { childIds.add(p.id); } };

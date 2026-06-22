@@ -359,14 +359,29 @@ function renderTree() {
     if (claimedBy && hasParents[claimedBy.id]) return false;
     return true;
   });
-  // For couples where both are roots, keep only one (using symmetric map)
+  // Dedup couples where both are roots
   const rootMap = new Map(roots.map(r => [r.id, r]));
+  const used = new Set();
   roots = roots.filter(p => {
+    if (used.has(p.id)) return false;
+    // Symmetric spouseId match
     const sId = spouseOf[p.id];
-    if (!sId) return true;
-    const s = rootMap.get(sId);
-    if (!s) return true;
-    return p.id < sId;
+    if (sId && rootMap.has(sId)) {
+      used.add(sId);
+      return p.id < sId;
+    }
+    // Fallback: share a child (both listed as parents of same person)
+    const childSharer = roots.find(other =>
+      other.id !== p.id && !used.has(other.id) &&
+      allPeople.some(c =>
+        (c.fatherId === p.id && c.motherId === other.id) ||
+        (c.motherId === p.id && c.fatherId === other.id)
+      )
+    );
+    if (childSharer) {
+      used.add(childSharer.id);
+    }
+    return true;
   });
 
   if (roots.length === 0) {
@@ -390,9 +405,17 @@ function renderTreeNode(personId, visited) {
   const person = allPeople.find(p => p.id === personId);
   if (!person || !matchesSearch(person)) return '';
 
-  const spouse = person.spouseId
+  let spouse = person.spouseId
     ? allPeople.find(s => s.id === person.spouseId)
     : allPeople.find(s => s.spouseId === person.id);
+  // Fallback: find spouse via shared children (neither has spouseId set)
+  if (!spouse) {
+    const child = allPeople.find(c => c.fatherId === personId || c.motherId === personId);
+    if (child) {
+      const coParentId = child.fatherId === personId ? child.motherId : child.fatherId;
+      if (coParentId) spouse = allPeople.find(p => p.id === coParentId) || null;
+    }
+  }
   // Find children of either parent in the couple
   const childIds = new Set();
   const addChild = p => { if (p && !childIds.has(p.id)) { childIds.add(p.id); } };

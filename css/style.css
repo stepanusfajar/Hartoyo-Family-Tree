@@ -384,7 +384,7 @@ ul.tree ul::before {
   top: 0;
   left: 20px;
   right: 20px;
-  border-top: 2px solid #d4c8bc;
+  border-top: 2px solid #cbbfaf;
 }
 
 ul.tree li {
@@ -392,60 +392,60 @@ ul.tree li {
   flex-direction: column;
   align-items: center;
   position: relative;
-  padding: 30px 15px 0;
+  padding: 35px 20px 0;
 }
 
-/* Child vertical line up to horizontal bar */
+/* Middle children: vertical line from card up to bar */
 ul.tree li::before {
   content: '';
   position: absolute;
   top: 0;
   left: 50%;
   width: 2px;
-  height: 30px;
-  background: #d4c8bc;
+  height: 35px;
+  background: #cbbfaf;
 }
 
-/* First child L-shape */
+/* First child: ┐ shape — horizontal bar enters from left, turns down */
 ul.tree li:first-child::before {
-  left: 50%;
-  width: 50%;
-  height: 30px;
-  background: none;
-  border-left: 2px solid #d4c8bc;
-  border-bottom: 2px solid #d4c8bc;
-  border-radius: 0 0 0 8px;
-}
-
-/* Last child reverse L-shape */
-ul.tree li:last-child::before {
   left: 0;
   width: 50%;
-  height: 30px;
+  height: 35px;
   background: none;
-  border-right: 2px solid #d4c8bc;
-  border-bottom: 2px solid #d4c8bc;
-  border-radius: 0 0 8px 0;
+  border-top: 2px solid #cbbfaf;
+  border-right: 2px solid #cbbfaf;
+  border-radius: 0 8px 0 0;
+}
+
+/* Last child: ┌ shape — horizontal bar enters from right, turns down */
+ul.tree li:last-child::before {
+  left: 50%;
+  width: 50%;
+  height: 35px;
+  background: none;
+  border-top: 2px solid #cbbfaf;
+  border-left: 2px solid #cbbfaf;
+  border-radius: 8px 0 0 0;
 }
 
 /* Only child: straight vertical line */
 ul.tree li:only-child::before {
-  background: #d4c8bc;
+  background: #cbbfaf;
   border: none;
   width: 2px;
-  height: 30px;
+  height: 35px;
   left: 50%;
   border-radius: 0;
 }
 
-/* Middle children */
+/* Middle children override — hand-off from previous sibling */
 ul.tree li:not(:first-child):not(:last-child)::before {
   left: 0;
   width: 100%;
-  height: 30px;
+  height: 35px;
   background: none;
-  border-left: 2px solid #d4c8bc;
-  border-bottom: 2px solid #d4c8bc;
+  border-left: 2px solid #cbbfaf;
+  border-bottom: 2px solid #cbbfaf;
   border-radius: 0;
 }
 
@@ -990,7 +990,7 @@ ul.tree ul {
 
   #tree-wrapper { padding: 10px 8px 40px; }
 
-  ul.tree li { padding: 25px 10px 0; }
+  ul.tree li { padding: 25px 12px 0; }
   ul.tree li::before,
   ul.tree li:first-child::before,
   ul.tree li:last-child::before,

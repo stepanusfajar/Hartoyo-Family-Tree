@@ -341,7 +341,17 @@ function renderTree() {
 
   // Find roots (people with no parents in the tree)
   const ids = new Set(allPeople.map(p => p.id));
-  let roots = allPeople.filter(p => !p.fatherId || !ids.has(p.fatherId));
+  const hasParentInTree = id => allPeople.some(p => p.id === id &&
+    ((p.fatherId && ids.has(p.fatherId)) || (p.motherId && ids.has(p.motherId))));
+  let roots = allPeople.filter(p => {
+    if (hasParentInTree(p.id)) return false;
+    // Also exclude if spouse has parents (this person belongs in spouse's family)
+    if (p.spouseId) {
+      const spouse = allPeople.find(s => s.id === p.spouseId);
+      if (spouse && hasParentInTree(spouse.id)) return false;
+    }
+    return true;
+  });
   // For couples where both are roots, keep only one
   const rootMap = new Map(roots.map(r => [r.id, r]));
   roots = roots.filter(p => {
@@ -373,7 +383,15 @@ function renderTreeNode(personId, visited) {
   if (!person || !matchesSearch(person)) return '';
 
   const spouse = person.spouseId ? allPeople.find(s => s.id === person.spouseId) : null;
-  const children = allPeople.filter(p => p.fatherId === personId || p.motherId === personId)
+  // Find children of either parent in the couple
+  const childIds = new Set();
+  const addChild = p => { if (p && !childIds.has(p.id)) { childIds.add(p.id); } };
+  allPeople.forEach(p => {
+    if (p.fatherId === personId || p.motherId === personId) addChild(p);
+    if (spouse && (p.fatherId === spouse.id || p.motherId === spouse.id)) addChild(p);
+  });
+  const children = Array.from(childIds).map(id => allPeople.find(p => p.id === id))
+    .filter(Boolean)
     .sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name));
 
   let html = '<li>';

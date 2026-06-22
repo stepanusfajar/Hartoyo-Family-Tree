@@ -337,7 +337,7 @@ a:hover {
 /* ===== Tree Wrapper ===== */
 #tree-wrapper {
   overflow: auto;
-  padding: 40px 24px 60px;
+  padding: 20px 24px 60px;
   min-height: calc(100vh - 120px);
 }
 
@@ -345,6 +345,7 @@ a:hover {
   display: flex;
   justify-content: center;
   transition: transform 0.25s ease;
+  padding: 30px 0;
 }
 
 .loading-state {
@@ -367,53 +368,97 @@ a:hover {
   to { transform: rotate(360deg); }
 }
 
-/* ===== Pyramid Tree Layout ===== */
-.pyramid {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-}
-
-.gen-row {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-.gen-row-inner {
+/* ===== Tree Structure ===== */
+ul.tree {
+  padding: 0;
+  position: relative;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  gap: 40px;
-  flex-wrap: wrap;
-  padding: 8px 20px;
+  list-style: none;
 }
 
-.fam-unit {
+/* Horizontal bar above each set of children */
+ul.tree ul::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  border-top: 2px solid #d4c8bc;
+}
+
+ul.tree li {
   display: flex;
   flex-direction: column;
   align-items: center;
-  animation: cardIn 0.4s ease-out both;
+  position: relative;
+  padding: 30px 15px 0;
 }
 
-/* Connector SVG bar between generations */
-.gen-bar {
+/* Child vertical line up to horizontal bar */
+ul.tree li::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 30px;
+  background: #d4c8bc;
+}
+
+/* First child L-shape */
+ul.tree li:first-child::before {
+  left: 50%;
+  width: 50%;
+  height: 30px;
+  background: none;
+  border-left: 2px solid #d4c8bc;
+  border-bottom: 2px solid #d4c8bc;
+  border-radius: 0 0 0 8px;
+}
+
+/* Last child reverse L-shape */
+ul.tree li:last-child::before {
+  left: 0;
+  width: 50%;
+  height: 30px;
+  background: none;
+  border-right: 2px solid #d4c8bc;
+  border-bottom: 2px solid #d4c8bc;
+  border-radius: 0 0 8px 0;
+}
+
+/* Only child: straight vertical line */
+ul.tree li:only-child::before {
+  background: #d4c8bc;
+  border: none;
+  width: 2px;
+  height: 30px;
+  left: 50%;
+  border-radius: 0;
+}
+
+/* Middle children */
+ul.tree li:not(:first-child):not(:last-child)::before {
+  left: 0;
   width: 100%;
-  max-width: 800px;
-  height: 32px;
-  margin: 0 auto;
-  opacity: 0.5;
+  height: 30px;
+  background: none;
+  border-left: 2px solid #d4c8bc;
+  border-bottom: 2px solid #d4c8bc;
+  border-radius: 0;
 }
 
-.gen-bar svg {
-  display: block;
-  width: 100%;
-  height: 100%;
+/* Nested UL */
+ul.tree ul {
+  padding-top: 0;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  list-style: none;
 }
 
-/* ===== Person Card (Modern) ===== */
+/* ===== Person Card ===== */
 .person-card {
   background: #fff;
   border-radius: 12px;
@@ -428,6 +473,7 @@ a:hover {
   box-shadow: 0 2px 10px rgba(0,0,0,0.06);
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   overflow: hidden;
+  animation: cardIn 0.35s ease-out both;
 }
 
 .person-card::before {
@@ -441,29 +487,17 @@ a:hover {
   border-radius: 12px 12px 0 0;
 }
 
-.person-card.male::before {
-  background: #5b8dc9;
-}
-
-.person-card.female::before {
-  background: #d4608c;
-}
-
-.person-card:not(.male):not(.female)::before {
-  background: #7dab7d;
-}
+.person-card.male::before { background: #5b8dc9; }
+.person-card.female::before { background: #d4608c; }
+.person-card:not(.male):not(.female)::before { background: #7dab7d; }
 
 .person-card:hover {
-  box-shadow: 0 8px 28px rgba(0,0,0,0.1), 0 0 0 3px rgba(212, 163, 115, 0.15);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.1);
   transform: translateY(-3px);
 }
 
 .person-card.male:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.1), 0 0 0 3px rgba(91, 141, 201, 0.2); }
 .person-card.female:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.1), 0 0 0 3px rgba(212, 96, 140, 0.2); }
-
-.pc-top {
-  height: 0;
-}
 
 .pc-name {
   font-weight: 600;
@@ -482,20 +516,58 @@ a:hover {
   margin-top: 3px;
 }
 
-.pc-actions {
-  margin-top: 10px;
+/* ===== Single Person ===== */
+.single-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.single-actions {
+  margin-top: 8px;
   display: flex;
   gap: 4px;
   justify-content: center;
-  flex-wrap: wrap;
   opacity: 0;
-  transform: translateY(4px);
   transition: all 0.2s;
 }
 
-.person-card:hover .pc-actions {
+.single-wrap:hover .single-actions {
   opacity: 1;
-  transform: translateY(0);
+}
+
+/* ===== Couple ===== */
+.couple {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.couple-cards {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.heart {
+  color: #e88d8d;
+  font-size: 1.2rem;
+  user-select: none;
+  flex-shrink: 0;
+  text-shadow: 0 1px 4px rgba(232, 141, 141, 0.25);
+}
+
+.couple-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.2s;
+}
+
+.couple:hover .couple-actions {
+  opacity: 1;
 }
 
 .pc-btn {
@@ -516,35 +588,6 @@ a:hover {
   color: #333;
 }
 
-.pc-actions-center {
-  margin-top: 8px;
-  display: flex;
-  gap: 4px;
-  justify-content: center;
-  opacity: 0;
-  transition: all 0.2s;
-}
-
-.fam-unit:hover .pc-actions-center {
-  opacity: 1;
-}
-
-/* ===== Spouse Group ===== */
-.spouse-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.spouse-connector {
-  color: #e88d8d;
-  font-size: 1.2rem;
-  user-select: none;
-  flex-shrink: 0;
-  text-shadow: 0 1px 4px rgba(232, 141, 141, 0.25);
-}
-
-/* ===== Animations ===== */
 @keyframes cardIn {
   from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }
@@ -945,7 +988,14 @@ a:hover {
   #search-input { width: 100%; }
   #search-input:focus { width: 100%; }
 
-  #tree-wrapper { padding: 24px 8px 40px; }
+  #tree-wrapper { padding: 10px 8px 40px; }
+
+  ul.tree li { padding: 25px 10px 0; }
+  ul.tree li::before,
+  ul.tree li:first-child::before,
+  ul.tree li:last-child::before,
+  ul.tree li:only-child::before,
+  ul.tree li:not(:first-child):not(:last-child)::before { height: 25px; }
 
   .person-card {
     width: 130px;
@@ -955,12 +1005,11 @@ a:hover {
     padding: 12px 8px 10px;
   }
   .pc-name { font-size: 0.85rem; }
-  .pc-actions { opacity: 1; transform: none; }
+  .single-actions { opacity: 1; }
+  .couple-actions { opacity: 1; }
   .pc-btn { padding: 2px 7px; font-size: 0.68rem; }
 
-  .spouse-group { gap: 6px; }
-  .gen-row-inner { gap: 20px; padding: 6px 12px; }
-  .gen-bar { max-width: 100%; height: 24px; }
+  .couple-cards { gap: 6px; }
 
   .modal-content { width: 96%; border-radius: 16px; }
   .modal-header { padding: 24px 20px 0; }

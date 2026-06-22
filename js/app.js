@@ -87,6 +87,7 @@ let editingPersonId = null;
 let zoomLevel = 1;
 let currentView = 'tree';
 let searchTerm = '';
+let hasParents = {}; // filled during renderTree
 
 // ===== HELPERS =====
 function escapeHtml(str) {
@@ -319,130 +320,120 @@ function calcGenerations() {
   return gen;
 }
 
-function renderPersonCard(person, showActions = true) {
+function renderPersonCard(person) {
   const gender = person.gender === 'male' ? 'male' : person.gender === 'female' ? 'female' : '';
   const years = getYears(person);
 
   return `
     <div class="person-card ${gender}" data-id="${person.id}">
-      <div class="pc-top"></div>
       <div class="pc-name">${escapeHtml(person.name)}</div>
       ${years ? `<div class="pc-years">${escapeHtml(years)}</div>` : ''}
-      ${currentUser && showActions ? `
-      <div class="pc-actions">
-        <button class="pc-btn pc-edit" data-id="${person.id}">Edit</button>
-        <button class="pc-btn pc-child" data-id="${person.id}">+ Child</button>
-        <button class="pc-btn pc-spouse" data-id="${person.id}">+ Spouse</button>
-      </div>` : ''}
     </div>`;
 }
 
 function renderTree() {
-  const gen = calcGenerations();
-
-  // Build a lookup for who has family parents in the tree
-  const hasParents = {};
+  // Build a lookup for who has parents in the tree
+  hasParents = {};
   allPeople.forEach(p => {
     hasParents[p.id] = (p.fatherId && allPeople.some(pp => pp.id === p.fatherId)) ||
                        (p.motherId && allPeople.some(pp => pp.id === p.motherId));
   });
 
-  // For each couple, determine the primary (blood-relative) member
-  const primaryMap = {};
-  allPeople.forEach(p => {
-    if (!p.spouseId) { primaryMap[p.id] = p; return; }
-    if (primaryMap[p.id]) return;
-    const spouse = allPeople.find(s => s.id === p.spouseId);
-    if (!spouse) { primaryMap[p.id] = p; return; }
-    if (primaryMap[spouse.id]) return;
-    // Determine who is primary
-    let primary, secondary;
-    if (hasParents[p.id] && !hasParents[spouse.id]) { primary = p; secondary = spouse; }
-    else if (!hasParents[p.id] && hasParents[spouse.id]) { primary = spouse; secondary = p; }
-    else {
-      // Both or neither have parents — use lower order, then name
-      const pKey = (p.order || 0) + '_' + p.name;
-      const sKey = (spouse.order || 0) + '_' + spouse.name;
-      if (pKey <= sKey) { primary = p; secondary = spouse; }
-      else { primary = spouse; secondary = p; }
-    }
-    primaryMap[primary.id] = primary;
-    primaryMap[secondary.id] = primary;
+  // Find roots (people with no parents in the tree)
+  const ids = new Set(allPeople.map(p => p.id));
+  let roots = allPeople.filter(p => !p.fatherId || !ids.has(p.fatherId));
+  // For couples where both are roots, keep only one
+  const rootMap = new Map(roots.map(r => [r.id, r]));
+  roots = roots.filter(p => {
+    if (!p.spouseId) return true;
+    const s = rootMap.get(p.spouseId);
+    if (!s) return true;
+    return p.id < s.id;
   });
 
-  const genGroups = {};
-  allPeople.forEach(p => {
-    const g = gen[p.id] !== undefined ? gen[p.id] : 0;
-    if (!genGroups[g]) genGroups[g] = [];
-    genGroups[g].push(p);
-  });
-
-  const gens = Object.keys(genGroups).map(Number).sort((a, b) => a - b);
-  if (gens.length === 0) {
+  if (roots.length === 0) {
     treeContainer.innerHTML = `<div class="loading-state"><p>Unable to build tree view</p></div>`;
     return;
   }
 
-  let html = '<div class="pyramid">';
-  const processed = new Set();
+  roots.sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name));
 
-  gens.forEach(g => {
-    let people = genGroups[g];
-
-    // Sort by the primary member's order, then primary's name
-    people.sort((a, b) => {
-      const pa = primaryMap[a.id] || a;
-      const pb = primaryMap[b.id] || b;
-      const oa = pa.order || 0;
-      const ob = pb.order || 0;
-      if (oa !== ob) return oa - ob;
-      if (pa.id !== pb.id) return pa.name.localeCompare(pb.name);
-      // Same primary (i.e. a couple) — sort secondary by order then name
-      return (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name);
-    });
-
-    html += `<div class="gen-row"><div class="gen-row-inner">`;
-
-    people.forEach(p => {
-      if (processed.has(p.id) || !matchesSearch(p)) return;
-      processed.add(p.id);
-
-      const spouse = p.spouseId ? allPeople.find(s => s.id === p.spouseId) : null;
-      if (spouse && !processed.has(spouse.id) && matchesSearch(spouse)) {
-        processed.add(spouse.id);
-        // Render primary on left, secondary on right
-        const primary = primaryMap[p.id] || p;
-        const secondary = primary.id === p.id ? spouse : p;
-        html += `<div class="fam-unit">
-          <div class="spouse-group">
-            ${renderPersonCard(primary, false)}
-            <span class="spouse-connector">&#9829;</span>
-            ${renderPersonCard(secondary, false)}
-          </div>
-          <div class="pc-actions-center">
-            <button class="pc-btn pc-edit" data-id="${primary.id}">Edit</button>
-            <button class="pc-btn pc-child" data-id="${primary.id}">+ Child</button>
-          </div>
-        </div>`;
-      } else {
-        html += `<div class="fam-unit">${renderPersonCard(p)}</div>`;
-      }
-    });
-
-    html += `</div></div>`;
-
-    if (g < gens[gens.length - 1]) {
-      html += `<div class="gen-bar">
-        <svg width="100%" height="32" viewBox="0 0 100 32" preserveAspectRatio="none">
-          <line x1="0" y1="0" x2="100" y2="0" stroke="#c9b8a8" stroke-width="1.5" stroke-dasharray="4 3"/>
-          <line x1="50" y1="0" x2="50" y2="32" stroke="#c9b8a8" stroke-width="1.5" stroke-dasharray="4 3"/>
-        </svg>
-      </div>`;
-    }
-  });
-
-  html += '</div>';
+  let html = '<ul class="tree">';
+  const visited = new Set();
+  roots.forEach(r => { html += renderTreeNode(r.id, visited); });
+  html += '</ul>';
   treeContainer.innerHTML = html;
+}
+
+function renderTreeNode(personId, visited) {
+  if (visited.has(personId)) return '';
+  visited.add(personId);
+
+  const person = allPeople.find(p => p.id === personId);
+  if (!person || !matchesSearch(person)) return '';
+
+  const spouse = person.spouseId ? allPeople.find(s => s.id === person.spouseId) : null;
+  const children = allPeople.filter(p => p.fatherId === personId || p.motherId === personId)
+    .sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name));
+
+  let html = '<li>';
+
+  // Determine which cards to show and their order
+  if (spouse && !visited.has(spouse.id) && matchesSearch(spouse)) {
+    visited.add(spouse.id);
+    const pPrimary = hasParents[person.id] && !hasParents[spouse.id];
+    const sPrimary = !hasParents[person.id] && hasParents[spouse.id];
+    let left, right;
+    if (pPrimary) { left = person; right = spouse; }
+    else if (sPrimary) { left = spouse; right = person; }
+    else {
+      if ((person.order || 0) < (spouse.order || 0) ||
+          ((person.order || 0) === (spouse.order || 0) && person.name <= spouse.name)) {
+        left = person; right = spouse;
+      } else { left = spouse; right = person; }
+    }
+    html += `<div class="couple">
+      <div class="couple-cards">
+        ${renderPersonCard(left)}
+        <span class="heart">&#9829;</span>
+        ${renderPersonCard(right)}
+      </div>
+      ${currentUser ? `
+      <div class="couple-actions">
+        <button class="pc-btn pc-edit" data-primary="${left.id}" data-spouse="${right.id}">Edit</button>
+        <button class="pc-btn pc-child" data-father="${left.gender === 'male' ? left.id : right.id}" data-mother="${left.gender === 'female' ? left.id : right.id}">+ Child</button>
+      </div>` : ''}
+    </div>`;
+  } else if (spouse && visited.has(spouse.id)) {
+    html += `<div class="single-wrap">
+      ${renderPersonCard(person)}
+      ${currentUser ? `
+      <div class="single-actions">
+        <button class="pc-btn pc-edit" data-id="${person.id}">Edit</button>
+        <button class="pc-btn pc-child" data-id="${person.id}">+ Child</button>
+        <button class="pc-btn pc-spouse" data-id="${person.id}">+ Spouse</button>
+      </div>` : ''}
+    </div>`;
+  } else {
+    html += `<div class="single-wrap">
+      ${renderPersonCard(person)}
+      ${currentUser ? `
+      <div class="single-actions">
+        <button class="pc-btn pc-edit" data-id="${person.id}">Edit</button>
+        <button class="pc-btn pc-child" data-id="${person.id}">+ Child</button>
+        <button class="pc-btn pc-spouse" data-id="${person.id}">+ Spouse</button>
+      </div>` : ''}
+    </div>`;
+  }
+
+  if (children.length > 0) {
+    html += '<ul>';
+    children.forEach(c => { html += renderTreeNode(c.id, visited); });
+    html += '</ul>';
+  }
+
+  html += '</li>';
+  return html;
 }
 
 // ===== LIST RENDERING =====
@@ -659,21 +650,40 @@ treeContainer.addEventListener('click', e => {
   if (!currentUser) return;
   const target = e.target.closest('button');
   if (!target) return;
-  const id = target.dataset.id;
-  if (!id) return;
-  const person = allPeople.find(p => p.id === id);
-  if (!person) return;
 
   if (target.classList.contains('pc-edit')) {
-    openModal(person);
+    const primaryId = target.dataset.primary;
+    const spouseId = target.dataset.spouse;
+    const id = primaryId || target.dataset.id;
+    const person = allPeople.find(p => p.id === id);
+    if (person) openModal(person);
   } else if (target.classList.contains('pc-child')) {
     openModal();
-    modalTitle.textContent = `Add a child of ${person.name}`;
+    const fatherId = target.dataset.father;
+    const motherId = target.dataset.mother;
+    const singleId = target.dataset.id;
+    if (fatherId && motherId) {
+      // Couple: pre-fill both
+      const father = allPeople.find(p => p.id === fatherId);
+      const mother = allPeople.find(p => p.id === motherId);
+      if (father) fieldFather.value = father.id;
+      if (mother) fieldMother.value = mother.id;
+      modalTitle.textContent = `Add a child of ${father ? father.name : ''} & ${mother ? mother.name : ''}`;
+    } else if (singleId) {
+      // Single person
+      const person = allPeople.find(p => p.id === singleId);
+      if (person) {
+        modalTitle.textContent = `Add a child of ${person.name}`;
+        if (person.gender === 'male') fieldFather.value = person.id;
+        else fieldMother.value = person.id;
+      }
+    }
     modalSubtitle.textContent = 'Enter their details';
-    if (person.gender === 'male') fieldFather.value = person.id;
-    else if (person.gender === 'female') fieldMother.value = person.id;
-    else fieldMother.value = person.id;
   } else if (target.classList.contains('pc-spouse')) {
+    const id = target.dataset.id;
+    if (!id) return;
+    const person = allPeople.find(p => p.id === id);
+    if (!person) return;
     openModal();
     modalTitle.textContent = `Add a spouse of ${person.name}`;
     modalSubtitle.textContent = 'Enter their details';

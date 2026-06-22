@@ -366,168 +366,114 @@ a:hover {
   to { transform: rotate(360deg); }
 }
 
-/* ===== Tree Structure ===== */
-#tree-container ul {
-  padding-top: 24px;
-  position: relative;
-  list-style: none;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-#tree-container ul ul {
-  padding-top: 44px;
-}
-
-#tree-container li {
+/* ===== Pyramid Tree Layout ===== */
+.pyramid {
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
-  padding: 0 12px;
+  gap: 0;
 }
 
-#tree-container li::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 0;
-  height: 24px;
-  border-left: 2px dashed #b7c9b0;
-}
-
-#tree-container li:first-child::before {
-  left: 50%;
-  width: 50%;
-  border-left: 2px dashed #b7c9b0;
-  border-bottom: 2px dashed #b7c9b0;
-  border-radius: 0 0 0 10px;
-}
-
-#tree-container li:last-child::before {
-  left: 0;
-  width: 50%;
-  border-right: 2px dashed #b7c9b0;
-  border-bottom: 2px dashed #b7c9b0;
-  border-radius: 0 0 10px 0;
-}
-
-#tree-container li:only-child::before {
-  display: none;
-}
-
-#tree-container ul > li:not(:first-child):not(:last-child)::before {
-  left: 0;
+.gen-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
-  border-left: 2px dashed #b7c9b0;
-  border-bottom: 2px dashed #b7c9b0;
-  border-radius: 0;
 }
 
-#tree-container ul::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 12px;
-  right: 12px;
-  height: 0;
-  border-top: 2px dashed #b7c9b0;
+.gen-row-inner {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  flex-wrap: wrap;
+  padding: 8px 20px;
 }
 
-#tree-container ul ul::before {
-  top: 0;
-}
-
-/* ===== Person Card ===== */
-.person-card {
-  background: #fff;
-  border: 2px solid #e8e4de;
-  border-radius: 14px;
-  padding: 14px 20px;
-  min-width: 150px;
-  max-width: 220px;
-  text-align: center;
-  cursor: pointer;
-  position: relative;
-  z-index: 2;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+.fam-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   animation: cardIn 0.4s ease-out both;
 }
 
-.person-card:hover {
-  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-  transform: translateY(-4px) scale(1.02);
+/* Connector SVG bar between generations */
+.gen-bar {
+  width: 100%;
+  max-width: 800px;
+  height: 32px;
+  margin: 0 auto;
+  opacity: 0.5;
 }
 
-.person-card.male {
-  border-color: #b8d4f0;
-  background: linear-gradient(135deg, #f0f7ff 0%, #e6f0ff 100%);
+.gen-bar svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-.person-card.female {
-  border-color: #f0c4d8;
-  background: linear-gradient(135deg, #fff0f6 0%, #ffe6f0 100%);
+/* ===== Person Card (Modern) ===== */
+.person-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 22px 14px;
+  min-width: 130px;
+  max-width: 200px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
 }
 
-.person-card.highlight {
-  border-color: #e9c46a;
-  box-shadow: 0 0 0 4px rgba(233,196,106,0.3);
+.person-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: #d0ccc5;
+  border-radius: 12px 12px 0 0;
 }
 
-.person-card.saved {
-  animation: savedPop 0.5s ease-out;
+.person-card.male::before {
+  background: #5b8dc9;
 }
 
-@keyframes savedPop {
-  0% { transform: scale(1); }
-  30% { transform: scale(1.08); }
-  100% { transform: scale(1); }
-}
-
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.person-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #fff;
-}
-.male .person-avatar {
-  background: #4a7fc7;
-}
-.female .person-avatar {
+.person-card.female::before {
   background: #d4608c;
 }
-.person-card:not(.male):not(.female) .person-avatar {
-  background: #6b8f71;
+
+.person-card:not(.male):not(.female)::before {
+  background: #7dab7d;
 }
 
-.person-name {
+.person-card:hover {
+  box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+  transform: translateY(-3px);
+}
+
+.pc-top {
+  height: 0;
+}
+
+.pc-name {
   font-weight: 600;
   font-size: 0.95rem;
-  color: #1b4332;
-  line-height: 1.3;
+  color: #2d2d2d;
+  line-height: 1.35;
+  margin-top: 2px;
 }
 
-.person-years {
+.pc-years {
   font-size: 0.78rem;
   color: #999;
   margin-top: 3px;
 }
 
-.person-actions {
+.pc-actions {
   margin-top: 10px;
   display: flex;
   gap: 4px;
@@ -538,20 +484,24 @@ a:hover {
   transition: all 0.2s;
 }
 
-.person-card:hover .person-actions,
-.editing .person-actions {
+.person-card:hover .pc-actions {
   opacity: 1;
   transform: translateY(0);
 }
 
-.person-actions .btn-sm {
-  background: rgba(255,255,255,0.9);
+.pc-btn {
+  padding: 3px 9px;
   border: 1px solid #e0dcd5;
-  color: #555;
+  border-radius: 6px;
+  background: #f8f6f2;
+  cursor: pointer;
   font-size: 0.72rem;
-  padding: 3px 8px;
+  font-family: inherit;
+  color: #666;
+  transition: all 0.15s;
 }
-.person-actions .btn-sm:hover {
+
+.pc-btn:hover {
   background: #fff;
   border-color: #bbb;
   color: #333;
@@ -562,20 +512,19 @@ a:hover {
   display: flex;
   align-items: center;
   gap: 10px;
-  animation: cardIn 0.4s ease-out both;
 }
 
 .spouse-connector {
-  color: #e9c46a;
-  font-size: 1.3rem;
+  color: #d4a373;
+  font-size: 1.2rem;
   user-select: none;
-  text-shadow: 0 1px 4px rgba(233,196,106,0.3);
-  animation: heartBeat 1.5s ease-in-out infinite;
+  flex-shrink: 0;
 }
 
-@keyframes heartBeat {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.15); }
+/* ===== Animations ===== */
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ===== List View ===== */
@@ -961,14 +910,16 @@ a:hover {
   #tree-wrapper { padding: 24px 8px 40px; }
 
   .person-card {
-    min-width: 110px;
-    padding: 10px 14px;
+    min-width: 100px;
+    padding: 12px 14px 10px;
   }
-  .person-name { font-size: 0.85rem; }
-  .person-avatar { width: 32px; height: 32px; font-size: 0.85rem; }
-  .person-actions { opacity: 1; transform: none; }
+  .pc-name { font-size: 0.85rem; }
+  .pc-actions { opacity: 1; transform: none; }
+  .pc-btn { padding: 2px 7px; font-size: 0.68rem; }
 
   .spouse-group { gap: 6px; }
+  .gen-row-inner { gap: 20px; padding: 6px 12px; }
+  .gen-bar { max-width: 100%; height: 24px; }
 
   .modal-content { width: 96%; border-radius: 16px; }
   .modal-header { padding: 24px 20px 0; }
@@ -985,7 +936,8 @@ a:hover {
 }
 
 @media (max-width: 480px) {
-  .person-card { min-width: 90px; padding: 8px 10px; }
+  .person-card { min-width: 80px; padding: 10px 10px 8px; }
+  .pc-name { font-size: 0.8rem; }
   .brand-icon { font-size: 1.2rem; }
   .hero-content h2 { font-size: 1.5rem; }
   .hero-icon { font-size: 2.5rem; }

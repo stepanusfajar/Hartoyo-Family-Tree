@@ -1,2 +1,4 @@
 # Hartoyo-Family-Tree
-This is the Hartoyo family tree
+Family Tree Web App
+Hosted on GitHub Pages
+Database: Firebase Firestore

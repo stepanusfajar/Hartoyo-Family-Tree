@@ -196,13 +196,24 @@ function subscribePeople() {
     listWrapper.style.display = currentView === 'list' ? 'block' : 'none';
 
     if (allPeople.length === 0) {
-      welcomeHero.style.display = 'flex';
-      setupGuide.style.display = 'none';
-      welcomeEmpty.style.display = 'block';
-      toolbar.style.display = 'none';
-      treeWrapper.style.display = 'none';
-      listWrapper.style.display = 'none';
-      heroSubtitle.textContent = 'Tree is empty — add the first family member!';
+      if (currentUser) {
+        welcomeHero.style.display = 'none';
+        toolbar.style.display = 'flex';
+        treeWrapper.style.display = 'block';
+        listWrapper.style.display = 'none';
+        treeContainer.innerHTML = `<div class="loading-state">
+          <p style="font-size:1.1rem;color:#666;margin-bottom:8px;">Your tree is empty</p>
+          <p style="font-size:0.9rem;color:#999;">Click <strong>"Add Member"</strong> above to add the first family member!</p>
+        </div>`;
+      } else {
+        welcomeHero.style.display = 'flex';
+        setupGuide.style.display = 'none';
+        welcomeEmpty.style.display = 'block';
+        toolbar.style.display = 'none';
+        treeWrapper.style.display = 'none';
+        listWrapper.style.display = 'none';
+        heroSubtitle.textContent = 'Sign in to start building your family tree.';
+      }
       return;
     }
 

@@ -9,23 +9,18 @@
    =========================================================== */
 
 // ===== CONFIG — REPLACE WITH YOUR FIREBASE PROJECT VALUES =====
+// This is a Firebase Web API Key — it identifies your project to Firebase.
+// Real security comes from Firestore rules (read:all, write:auth) and the
+// domain restriction set in Google Cloud Console (stepanusfajar.github.io/*).
+
 const FAMILY_NAME = "Hartoyo"; // Change to your family name
 const firebaseConfig = {
-  apiKey: "AIzaSyBhJiuN07UHBR6beHyYgwj2_BFnKEZnF88",
+  apiKey: "AIzaSyBuIffixgpSa81JXZsh2NlFxBmUcMsH_Fg",
   authDomain: "hartoyo-family-tree.firebaseapp.com",
   projectId: "hartoyo-family-tree",
   storageBucket: "hartoyo-family-tree.firebasestorage.app",
   messagingSenderId: "108305598651",
   appId: "1:108305598651:web:a7149ccf3de633e8bd019e"
-};
-
-const DEFAULT_CONFIG = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
 };
 
 function isFirebaseConfigured() {

@@ -417,8 +417,11 @@ a:hover {
 .person-card {
   background: #fff;
   border-radius: 12px;
-  padding: 16px 18px 14px;
+  padding: 16px 12px 14px;
   width: 160px;
+  min-width: 160px;
+  max-width: 160px;
+  flex: 0 0 160px;
   text-align: center;
   cursor: pointer;
   position: relative;
@@ -511,6 +514,19 @@ a:hover {
   background: #fff;
   border-color: #bbb;
   color: #333;
+}
+
+.pc-actions-center {
+  margin-top: 8px;
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.2s;
+}
+
+.fam-unit:hover .pc-actions-center {
+  opacity: 1;
 }
 
 /* ===== Spouse Group ===== */
@@ -933,7 +949,10 @@ a:hover {
 
   .person-card {
     width: 130px;
-    padding: 12px 12px 10px;
+    min-width: 130px;
+    max-width: 130px;
+    flex: 0 0 130px;
+    padding: 12px 8px 10px;
   }
   .pc-name { font-size: 0.85rem; }
   .pc-actions { opacity: 1; transform: none; }
@@ -958,7 +977,7 @@ a:hover {
 }
 
 @media (max-width: 480px) {
-  .person-card { width: 110px; padding: 10px 8px 8px; }
+  .person-card { width: 110px; min-width: 110px; max-width: 110px; flex: 0 0 110px; padding: 10px 6px 8px; }
   .pc-name { font-size: 0.8rem; }
   .brand-icon { font-size: 1.2rem; }
   .hero-content h2 { font-size: 1.5rem; }

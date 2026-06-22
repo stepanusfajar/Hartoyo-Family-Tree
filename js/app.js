@@ -340,6 +340,36 @@ function renderPersonCard(person, showActions = true) {
 function renderTree() {
   const gen = calcGenerations();
 
+  // Build a lookup for who has family parents in the tree
+  const hasParents = {};
+  allPeople.forEach(p => {
+    hasParents[p.id] = (p.fatherId && allPeople.some(pp => pp.id === p.fatherId)) ||
+                       (p.motherId && allPeople.some(pp => pp.id === p.motherId));
+  });
+
+  // For each couple, determine the primary (blood-relative) member
+  const primaryMap = {};
+  allPeople.forEach(p => {
+    if (!p.spouseId) { primaryMap[p.id] = p; return; }
+    if (primaryMap[p.id]) return;
+    const spouse = allPeople.find(s => s.id === p.spouseId);
+    if (!spouse) { primaryMap[p.id] = p; return; }
+    if (primaryMap[spouse.id]) return;
+    // Determine who is primary
+    let primary, secondary;
+    if (hasParents[p.id] && !hasParents[spouse.id]) { primary = p; secondary = spouse; }
+    else if (!hasParents[p.id] && hasParents[spouse.id]) { primary = spouse; secondary = p; }
+    else {
+      // Both or neither have parents — use lower order, then name
+      const pKey = (p.order || 0) + '_' + p.name;
+      const sKey = (spouse.order || 0) + '_' + spouse.name;
+      if (pKey <= sKey) { primary = p; secondary = spouse; }
+      else { primary = spouse; secondary = p; }
+    }
+    primaryMap[primary.id] = primary;
+    primaryMap[secondary.id] = primary;
+  });
+
   const genGroups = {};
   allPeople.forEach(p => {
     const g = gen[p.id] !== undefined ? gen[p.id] : 0;
@@ -358,8 +388,19 @@ function renderTree() {
 
   gens.forEach(g => {
     let people = genGroups[g];
-    // Sort by display order within generation (lowest first), then by name
-    people.sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name));
+
+    // Sort by the primary member's order, then primary's name
+    people.sort((a, b) => {
+      const pa = primaryMap[a.id] || a;
+      const pb = primaryMap[b.id] || b;
+      const oa = pa.order || 0;
+      const ob = pb.order || 0;
+      if (oa !== ob) return oa - ob;
+      if (pa.id !== pb.id) return pa.name.localeCompare(pb.name);
+      // Same primary (i.e. a couple) — sort secondary by order then name
+      return (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name);
+    });
+
     html += `<div class="gen-row"><div class="gen-row-inner">`;
 
     people.forEach(p => {
@@ -369,11 +410,18 @@ function renderTree() {
       const spouse = p.spouseId ? allPeople.find(s => s.id === p.spouseId) : null;
       if (spouse && !processed.has(spouse.id) && matchesSearch(spouse)) {
         processed.add(spouse.id);
+        // Render primary on left, secondary on right
+        const primary = primaryMap[p.id] || p;
+        const secondary = primary.id === p.id ? spouse : p;
         html += `<div class="fam-unit">
           <div class="spouse-group">
-            ${renderPersonCard(p)}
+            ${renderPersonCard(primary, false)}
             <span class="spouse-connector">&#9829;</span>
-            ${renderPersonCard(spouse)}
+            ${renderPersonCard(secondary, false)}
+          </div>
+          <div class="pc-actions-center">
+            <button class="pc-btn pc-edit" data-id="${primary.id}">Edit</button>
+            <button class="pc-btn pc-child" data-id="${primary.id}">+ Child</button>
           </div>
         </div>`;
       } else {
@@ -383,7 +431,6 @@ function renderTree() {
 
     html += `</div></div>`;
 
-    // Connector bar between generations (except after last)
     if (g < gens[gens.length - 1]) {
       html += `<div class="gen-bar">
         <svg width="100%" height="32" viewBox="0 0 100 32" preserveAspectRatio="none">

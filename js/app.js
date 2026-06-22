@@ -24,8 +24,8 @@ const firebaseConfig = {
 };
 
 function isFirebaseConfigured() {
-  return firebaseConfig.apiKey !== DEFAULT_CONFIG.apiKey &&
-         firebaseConfig.projectId !== DEFAULT_CONFIG.projectId;
+  return firebaseConfig.apiKey && firebaseConfig.projectId &&
+         firebaseConfig.apiKey.length > 10;
 }
 
 // ===== DOM REFS =====

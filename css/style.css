@@ -337,6 +337,7 @@ a:hover {
 /* ===== Tree Wrapper ===== */
 #tree-wrapper {
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 20px 24px 60px;
   min-height: calc(100vh - 120px);
 }

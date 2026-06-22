@@ -55,6 +55,7 @@ const fieldFather = $('field-father');
 const fieldMother = $('field-mother');
 const fieldSpouse = $('field-spouse');
 const fieldNotes = $('field-notes');
+const fieldOrder = $('field-order');
 
 const familyTitle = $('family-title');
 const btnLogin = $('btn-login');
@@ -356,7 +357,9 @@ function renderTree() {
   const processed = new Set();
 
   gens.forEach(g => {
-    const people = genGroups[g];
+    let people = genGroups[g];
+    // Sort by display order within generation (lowest first), then by name
+    people.sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name));
     html += `<div class="gen-row"><div class="gen-row-inner">`;
 
     people.forEach(p => {
@@ -384,8 +387,8 @@ function renderTree() {
     if (g < gens[gens.length - 1]) {
       html += `<div class="gen-bar">
         <svg width="100%" height="32" viewBox="0 0 100 32" preserveAspectRatio="none">
-          <line x1="0" y1="0" x2="100" y2="0" stroke="#c5d5c0" stroke-width="1.5"/>
-          <line x1="50" y1="0" x2="50" y2="32" stroke="#c5d5c0" stroke-width="1.5"/>
+          <line x1="0" y1="0" x2="100" y2="0" stroke="#c9b8a8" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <line x1="50" y1="0" x2="50" y2="32" stroke="#c9b8a8" stroke-width="1.5" stroke-dasharray="4 3"/>
         </svg>
       </div>`;
     }
@@ -470,6 +473,7 @@ function openModal(person = null) {
     fieldMother.value = person.motherId || '';
     fieldSpouse.value = person.spouseId || '';
     fieldNotes.value = person.notes || '';
+    fieldOrder.value = person.order !== undefined ? person.order : 0;
     btnDeletePerson.style.display = 'inline-flex';
     updateGenderPicker(person.gender);
   } else {
@@ -478,6 +482,7 @@ function openModal(person = null) {
     modalAvatar.textContent = '?';
     personForm.reset();
     fieldId.value = '';
+    fieldOrder.value = 0;
     btnDeletePerson.style.display = 'none';
     updateGenderPicker('');
   }
@@ -526,7 +531,8 @@ btnSavePerson.addEventListener('click', () => {
     fatherId: fieldFather.value || null,
     motherId: fieldMother.value || null,
     spouseId: fieldSpouse.value || null,
-    notes: fieldNotes.value.trim() || ''
+    notes: fieldNotes.value.trim() || '',
+    order: fieldOrder.value ? parseInt(fieldOrder.value) : 0
   };
 
   if (data.birthYear && data.deathYear && data.deathYear < data.birthYear) {

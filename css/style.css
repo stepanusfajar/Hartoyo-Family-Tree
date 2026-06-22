@@ -377,25 +377,21 @@ ul.tree {
   list-style: none;
 }
 
-/* Horizontal bar above each set of children */
-ul.tree ul::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 20px;
-  right: 20px;
-  border-top: 2px solid #cbbfaf;
-}
-
 ul.tree li {
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
   padding: 35px 20px 0;
+  flex-shrink: 0;
 }
 
-/* Middle children: vertical line from card up to bar */
+/* Root-level LIs have no parent — no dangling line above */
+ul.tree > li::before {
+  content: none;
+}
+
+/* Each child: vertical line from card up to the horizontal bar */
 ul.tree li::before {
   content: '';
   position: absolute;
@@ -406,56 +402,35 @@ ul.tree li::before {
   background: #cbbfaf;
 }
 
-/* First child: ┐ shape — horizontal bar enters from left, turns down */
-ul.tree li:first-child::before {
-  left: 0;
-  width: 50%;
-  height: 35px;
-  background: none;
-  border-top: 2px solid #cbbfaf;
-  border-right: 2px solid #cbbfaf;
-  border-radius: 0 8px 0 0;
-}
-
-/* Last child: ┌ shape — horizontal bar enters from right, turns down */
-ul.tree li:last-child::before {
-  left: 50%;
-  width: 50%;
-  height: 35px;
-  background: none;
-  border-top: 2px solid #cbbfaf;
-  border-left: 2px solid #cbbfaf;
-  border-radius: 8px 0 0 0;
-}
-
-/* Only child: straight vertical line */
-ul.tree li:only-child::before {
-  background: #cbbfaf;
-  border: none;
-  width: 2px;
-  height: 35px;
-  left: 50%;
-  border-radius: 0;
-}
-
-/* Middle children override — hand-off from previous sibling */
-ul.tree li:not(:first-child):not(:last-child)::before {
-  left: 0;
-  width: 100%;
-  height: 35px;
-  background: none;
-  border-left: 2px solid #cbbfaf;
-  border-bottom: 2px solid #cbbfaf;
-  border-radius: 0;
-}
-
-/* Nested UL */
+/* Nested UL — children container */
 ul.tree ul {
   padding-top: 0;
+  margin-top: 20px;
   position: relative;
   display: flex;
   justify-content: center;
   list-style: none;
+}
+
+/* Vertical stem from parent card down to children's horizontal bar */
+ul.tree ul::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  width: 2px;
+  height: 20px;
+  background: #cbbfaf;
+}
+
+/* Horizontal bar spanning all children */
+ul.tree ul::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  border-top: 2px solid #cbbfaf;
 }
 
 /* ===== Person Card ===== */
@@ -467,6 +442,7 @@ ul.tree ul {
   min-width: 160px;
   max-width: 160px;
   flex: 0 0 160px;
+  box-sizing: border-box;
   text-align: center;
   cursor: pointer;
   position: relative;
@@ -991,11 +967,9 @@ ul.tree ul {
   #tree-wrapper { padding: 10px 8px 40px; }
 
   ul.tree li { padding: 25px 12px 0; }
-  ul.tree li::before,
-  ul.tree li:first-child::before,
-  ul.tree li:last-child::before,
-  ul.tree li:only-child::before,
-  ul.tree li:not(:first-child):not(:last-child)::before { height: 25px; }
+  ul.tree li::before { height: 25px; }
+  ul.tree ul { margin-top: 14px; }
+  ul.tree ul::before { top: -14px; height: 14px; }
 
   .person-card {
     width: 130px;

@@ -107,6 +107,29 @@
     <div id="list-container"></div>
   </div>
 
+  <!-- Passcode Modal -->
+  <div id="passcode-modal" class="modal" style="display:none">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content" style="max-width:380px">
+      <div class="modal-header">
+        <div class="modal-avatar">&#128273;</div>
+        <h2>Family Passcode</h2>
+        <p class="modal-subtitle">Enter the family passcode to edit the tree</p>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="field-passcode">Passcode</label>
+          <input type="password" id="field-passcode" style="font-size:1.2rem;letter-spacing:2px;text-align:center" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
+        </div>
+        <p id="passcode-error" style="color:#dc3545;font-size:0.85rem;display:none;text-align:center;margin-top:8px"></p>
+      </div>
+      <div class="modal-footer" style="justify-content:center">
+        <button id="btn-cancel-passcode" class="btn btn-ghost">Sign Out</button>
+        <button id="btn-verify-passcode" class="btn btn-primary">Unlock</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Edit Modal -->
   <div id="modal" class="modal" style="display:none">
     <div class="modal-backdrop"></div>

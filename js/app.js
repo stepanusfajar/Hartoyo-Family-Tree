@@ -14,6 +14,8 @@
 // domain restriction set in Google Cloud Console (stepanusfajar.github.io/*).
 
 const FAMILY_NAME = "Hartoyo"; // Change to your family name
+const FAMILY_PASSCODE = "H4rt0y0H3ny"; // Shared passcode to edit the tree — change this
+const ADMIN_EMAIL = "evancloud2@gmail.com"; // Your email — no passcode needed
 const firebaseConfig = {
   apiKey: "AIzaSy" + "DM1plBX_aFrngfW0UWPeaHV9HxZPxPVWU",
   authDomain: "hartoyo-family-tree.firebaseapp.com",
@@ -52,6 +54,12 @@ const fieldSpouse = $('field-spouse');
 const fieldNotes = $('field-notes');
 const fieldOrder = $('field-order');
 
+const passcodeModal = $('passcode-modal');
+const fieldPasscode = $('field-passcode');
+const btnVerifyPasscode = $('btn-verify-passcode');
+const btnCancelPasscode = $('btn-cancel-passcode');
+const passcodeError = $('passcode-error');
+
 const familyTitle = $('family-title');
 const btnLogin = $('btn-login');
 const btnLogout = $('btn-logout');
@@ -83,6 +91,7 @@ let zoomLevel = 1;
 let currentView = 'tree';
 let searchTerm = '';
 let hasParents = {}; // filled during renderTree
+let passcodeVerified = false;
 
 // ===== HELPERS =====
 function escapeHtml(str) {
@@ -153,6 +162,23 @@ function initFirebase() {
 }
 
 // ===== AUTH =====
+function showPasscodePrompt() {
+  passcodeError.style.display = 'none';
+  fieldPasscode.value = '';
+  passcodeModal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => fieldPasscode.focus(), 100);
+}
+
+function hidePasscodePrompt() {
+  passcodeModal.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function setEditingEnabled(enabled) {
+  btnAddPerson.disabled = !enabled;
+}
+
 function setupAuth() {
   auth.onAuthStateChanged(user => {
     currentUser = user;
@@ -161,12 +187,49 @@ function setupAuth() {
       btnLogin.style.display = 'none';
       userName.textContent = user.displayName || user.email;
       userAvatar.src = user.photoURL || '';
-      btnAddPerson.disabled = false;
+      if (user.email === ADMIN_EMAIL) {
+        passcodeVerified = true;
+        setEditingEnabled(true);
+      } else {
+        passcodeVerified = false;
+        setEditingEnabled(false);
+        showPasscodePrompt();
+      }
     } else {
       userInfo.style.display = 'none';
       btnLogin.style.display = 'inline-flex';
-      btnAddPerson.disabled = true;
+      passcodeVerified = false;
+      setEditingEnabled(false);
     }
+  });
+
+  btnVerifyPasscode.addEventListener('click', () => {
+    const entered = fieldPasscode.value.trim();
+    if (entered === FAMILY_PASSCODE) {
+      passcodeVerified = true;
+      hidePasscodePrompt();
+      setEditingEnabled(true);
+      showToast('Passcode accepted!', 'success');
+    } else {
+      passcodeError.textContent = 'Incorrect passcode. Try again.';
+      passcodeError.style.display = 'block';
+      fieldPasscode.value = '';
+      fieldPasscode.focus();
+    }
+  });
+
+  fieldPasscode.addEventListener('keydown', e => {
+    if (e.key === 'Enter') btnVerifyPasscode.click();
+    if (e.key === 'Escape') btnCancelPasscode.click();
+  });
+
+  btnCancelPasscode.addEventListener('click', () => {
+    hidePasscodePrompt();
+    auth.signOut();
+  });
+
+  passcodeModal.addEventListener('click', e => {
+    if (e.target.classList.contains('modal-backdrop')) btnCancelPasscode.click();
   });
 
   btnLogin.addEventListener('click', () => {
@@ -444,7 +507,7 @@ function renderTreeNode(personId, visited) {
         <span class="heart">&#9829;</span>
         ${renderPersonCard(right)}
       </div>
-      ${currentUser ? `
+      ${currentUser && passcodeVerified ? `
       <div class="couple-actions">
         <button class="pc-btn pc-edit" data-primary="${left.id}" data-spouse="${right.id}">Edit</button>
         <button class="pc-btn pc-child" data-father="${left.gender === 'male' ? left.id : right.id}" data-mother="${left.gender === 'female' ? left.id : right.id}">+ Child</button>
@@ -453,7 +516,7 @@ function renderTreeNode(personId, visited) {
   } else if (spouse && visited.has(spouse.id)) {
     html += `<div class="single-wrap">
       ${renderPersonCard(person)}
-      ${currentUser ? `
+      ${currentUser && passcodeVerified ? `
       <div class="single-actions">
         <button class="pc-btn pc-edit" data-id="${person.id}">Edit</button>
         <button class="pc-btn pc-child" data-id="${person.id}">+ Child</button>
@@ -463,7 +526,7 @@ function renderTreeNode(personId, visited) {
   } else {
     html += `<div class="single-wrap">
       ${renderPersonCard(person)}
-      ${currentUser ? `
+      ${currentUser && passcodeVerified ? `
       <div class="single-actions">
         <button class="pc-btn pc-edit" data-id="${person.id}">Edit</button>
         <button class="pc-btn pc-child" data-id="${person.id}">+ Child</button>
@@ -530,11 +593,12 @@ function renderList() {
 
 // Listen for clicks on list items to open edit
 listContainer.addEventListener('click', e => {
+  if (!currentUser || !passcodeVerified) return;
   const card = e.target.closest('.list-card');
   if (!card) return;
   const id = card.dataset.id;
   const person = allPeople.find(p => p.id === id);
-  if (person && currentUser) openModal(person);
+  if (person) openModal(person);
 });
 
 // ===== MODAL =====
@@ -666,8 +730,9 @@ btnDeletePerson.addEventListener('click', () => {
 btnAddPerson.addEventListener('click', () => openModal());
 welcomeAddLink.addEventListener('click', e => {
   e.preventDefault();
-  if (currentUser) openModal();
-  else btnLogin.click();
+  if (!currentUser) { btnLogin.click(); return; }
+  if (!passcodeVerified) { showPasscodePrompt(); return; }
+  openModal();
 });
 
 // ===== POPULATE SELECTS =====
@@ -693,7 +758,7 @@ function populateSelects() {
 
 // ===== TREE EVENTS =====
 treeContainer.addEventListener('click', e => {
-  if (!currentUser) return;
+  if (!currentUser || !passcodeVerified) return;
   const target = e.target.closest('button');
   if (!target) return;
 
@@ -739,7 +804,7 @@ treeContainer.addEventListener('click', e => {
 
 // Double-click to edit in tree view
 treeContainer.addEventListener('dblclick', e => {
-  if (!currentUser) return;
+  if (!currentUser || !passcodeVerified) return;
   const card = e.target.closest('.person-card');
   if (!card) return;
   const id = card.dataset.id;

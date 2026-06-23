@@ -176,7 +176,6 @@ a:hover {
   border-bottom: 1px solid #e8e4de;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 12px;
   position: sticky;
   top: 60px;
@@ -184,6 +183,10 @@ a:hover {
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 
+#toolbar:not(.tree-view) { justify-content: space-between; }
+#toolbar:not(.tree-view) .toolbar-center { flex: 1; justify-content: center; }
+
+#toolbar.tree-view { justify-content: center; }
 #toolbar.tree-view .toolbar-left { display: none; }
 #toolbar.tree-view .toolbar-center { flex: 0; }
 #toolbar.tree-view .toolbar-right { margin-left: auto; }
@@ -468,7 +471,7 @@ ul.tree ul::after {
 }
 
 .person-card.male::before { background: #C4956A; }
-.person-card.female::before { background: #D4845A; }
+.person-card.female::before { background: #D4608C; }
 .person-card:not(.male):not(.female)::before { background: #A8B88A; }
 
 .person-card:hover {
@@ -477,7 +480,7 @@ ul.tree ul::after {
 }
 
 .person-card.male:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.1), 0 0 0 3px rgba(196, 149, 106, 0.2); }
-.person-card.female:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.1), 0 0 0 3px rgba(212, 132, 90, 0.2); }
+.person-card.female:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.1), 0 0 0 3px rgba(212, 96, 140, 0.2); }
 
 .pc-name {
   font-weight: 600;
@@ -530,12 +533,12 @@ ul.tree ul::after {
 }
 
 .heart {
-  color: #D4845A;
+  color: #D4608C;
   font-size: 1.2rem;
   user-select: none;
   align-self: center;
   flex-shrink: 0;
-  text-shadow: 0 1px 4px rgba(212, 132, 90, 0.25);
+  text-shadow: 0 1px 4px rgba(212, 96, 140, 0.25);
 }
 
 .couple-actions {
@@ -618,7 +621,7 @@ ul.tree ul::after {
   flex-shrink: 0;
 }
 .list-avatar.male { background: #C4956A; }
-.list-avatar.female { background: #D4845A; }
+.list-avatar.female { background: #D4608C; }
 .list-avatar:not(.male):not(.female) { background: #A8B88A; }
 
 .list-info {
@@ -892,9 +895,9 @@ ul.tree ul::after {
 }
 
 .gender-option[data-value="female"].selected {
-  border-color: #D4845A;
-  background: #FFF0EC;
-  color: #D4845A;
+  border-color: #D4608C;
+  background: #FFF0F4;
+  color: #D4608C;
 }
 
 /* ===== Toast ===== */

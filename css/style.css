@@ -184,12 +184,13 @@ a:hover {
 }
 
 #toolbar:not(.tree-view) { justify-content: space-between; }
+#toolbar:not(.tree-view) .toolbar-left { flex: 0; display: flex; }
 #toolbar:not(.tree-view) .toolbar-center { flex: 1; justify-content: center; }
+#toolbar:not(.tree-view) .toolbar-right { flex: 0; display: flex; align-items: center; gap: 8px; }
 
-#toolbar.tree-view { position: relative; justify-content: center; }
-#toolbar.tree-view .toolbar-left { display: none; }
-#toolbar.tree-view .toolbar-center { flex: 0; }
-#toolbar.tree-view .toolbar-right { position: absolute; right: 20px; }
+#toolbar.tree-view .toolbar-left { flex: 1; visibility: hidden; display: flex; }
+#toolbar.tree-view .toolbar-center { flex: 0; display: flex; }
+#toolbar.tree-view .toolbar-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 8px; }
 
 .toolbar-left, .toolbar-center, .toolbar-right {
   display: flex;

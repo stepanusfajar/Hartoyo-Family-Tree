@@ -1,9 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <circle cx="16" cy="16" r="15" fill="#f4eff2"/>
-  <circle cx="16" cy="16" r="15" fill="none" stroke="#7B6B7B" stroke-width="1.5"/>
-  <path d="M12 24 Q14 22 15 25 Q16 28 14 29" stroke="#7B6B7B" stroke-width="2" fill="none" stroke-linecap="round"/>
-  <path d="M20 24 Q18 22 17 25 Q16 28 18 29" stroke="#7B6B7B" stroke-width="2" fill="none" stroke-linecap="round"/>
-  <rect x="15" y="11" width="2" height="13" rx="1" fill="#7B6B7B"/>
-  <path d="M16 4 Q22 9 23 14 Q18 16 16 11 Q14 16 9 14 Q10 9 16 4Z" fill="#9BA8B0"/>
-  <circle cx="19" cy="8" r="1.5" fill="#B08B9B" opacity="0.8"/>
+  <circle cx="16" cy="16" r="14.5" fill="#FFF8F0"/>
+  <circle cx="16" cy="16" r="14.5" fill="none" stroke="#E8B87D" stroke-width="1.8"/>
+  <path d="M16 2 A14 14 0 0 0 2 16" fill="none" stroke="#DDA07C" stroke-width="1.5"/>
+  <path d="M16 5 A11 11 0 0 0 5 16" fill="none" stroke="#D4845A" stroke-width="1.3"/>
+  <path d="M16 8 A8 8 0 0 0 8 16" fill="none" stroke="#C4744A" stroke-width="1.1"/>
+  <path d="M16 11.5 A4.5 4.5 0 0 0 11.5 16" fill="none" stroke="#C4956A" stroke-width="0.9"/>
+  <circle cx="16" cy="16" r="2" fill="#C4956A"/>
+  <line x1="16" y1="16" x2="16" y2="2" stroke="#E8B87D" stroke-width="0.8" opacity="0.4"/>
 </svg>

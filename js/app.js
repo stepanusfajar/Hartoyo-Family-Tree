@@ -253,6 +253,7 @@ function subscribePeople() {
 
     welcomeHero.style.display = 'none';
     toolbar.style.display = 'flex';
+    updateToolbarView();
     treeWrapper.style.display = currentView === 'tree' ? 'block' : 'none';
     listWrapper.style.display = currentView === 'list' ? 'block' : 'none';
 
@@ -260,6 +261,7 @@ function subscribePeople() {
       if (currentUser) {
         welcomeHero.style.display = 'none';
         toolbar.style.display = 'flex';
+        updateToolbarView();
         treeWrapper.style.display = 'block';
         listWrapper.style.display = 'none';
         treeContainer.innerHTML = `<div class="loading-state">
@@ -304,13 +306,24 @@ function deletePerson(id) {
 }
 
 // ===== VIEW TOGGLE =====
+function updateToolbarView() {
+  const tb = document.getElementById('toolbar');
+  if (currentView === 'tree') {
+    tb.classList.add('tree-view');
+    searchBox.style.display = 'none';
+  } else {
+    tb.classList.remove('tree-view');
+    searchBox.style.display = 'block';
+  }
+}
+
 btnViewTree.addEventListener('click', () => {
   currentView = 'tree';
   btnViewTree.classList.add('active');
   btnViewList.classList.remove('active');
   treeWrapper.style.display = 'block';
   listWrapper.style.display = 'none';
-  searchBox.style.display = 'none';
+  updateToolbarView();
   renderCurrentView();
 });
 
@@ -320,7 +333,7 @@ btnViewList.addEventListener('click', () => {
   btnViewTree.classList.remove('active');
   listWrapper.style.display = 'block';
   treeWrapper.style.display = 'none';
-  searchBox.style.display = 'block';
+  updateToolbarView();
   renderCurrentView();
 });
 

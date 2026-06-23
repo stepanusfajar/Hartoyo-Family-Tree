@@ -75,6 +75,7 @@ const userInfo = $('user-info');
 const userName = $('user-name');
 const userAvatar = $('user-avatar');
 const searchInput = $('search-input');
+const searchBox = document.querySelector('.search-box');
 const btnViewTree = $('btn-view-tree');
 const btnViewList = $('btn-view-list');
 const btnZoomIn = $('btn-zoom-in');
@@ -309,6 +310,7 @@ btnViewTree.addEventListener('click', () => {
   btnViewList.classList.remove('active');
   treeWrapper.style.display = 'block';
   listWrapper.style.display = 'none';
+  searchBox.style.display = 'none';
   renderCurrentView();
 });
 
@@ -318,6 +320,7 @@ btnViewList.addEventListener('click', () => {
   btnViewTree.classList.remove('active');
   listWrapper.style.display = 'block';
   treeWrapper.style.display = 'none';
+  searchBox.style.display = 'block';
   renderCurrentView();
 });
 
